@@ -1,35 +1,92 @@
 ﻿using System.Data.SqlClient;
 using ControleImpressões;
+using ControleImpressões.Data;
 
 Conexao db = new Conexao();
 //db representa classe conexão
 
 db.Conectar();
 
-List<Aluno> alunos = new List<Aluno>();
+AlunoRepositorio alunoRepositorio = new AlunoRepositorio(db .conn);
 
-alunos.Add(new Aluno { Nome = "Ana", Idade= 36, Cpf= "019.197.262-25"});
-alunos.Add(new Aluno { Nome = "Thiago", Idade = 42, Cpf = "000.540.098-40" });
+int opcoes  = 0;
 
-foreach (var aluno in alunos)
+while (opcoes != 5)
 {
-    var retorno = InserirAluno(db, aluno);
-    Console.WriteLine(retorno);
+    opcoes = Menu();
+    Console.Clear();
+    switch (opcoes)
+    {
+        case 1:
+            CadastrarAluno();
+            break;
+        case 2:
+            ConsultarAluno();
+            break;
+        case 3:
+
+            break;
+        case 4:
+
+            break;
+        case 5:
+            Console.WriteLine("ENCERRANDO PROGRAMA....");
+            break;
+    }
+}
+Console.ReadKey();
+static int Menu()
+{
+    Console.WriteLine("MENU DE OPÇÕES");
+    Console.WriteLine("===================");
+    Console.WriteLine("[1] Cadastrar Aluno");
+    Console.WriteLine("[2] Consultar Aluno");
+    Console.WriteLine("[3] Alterar dados do aluno");
+    Console.WriteLine("[4] Excluir Aluno");
+    Console.WriteLine("[5] Sair");
+
+    int opcoes = int.Parse(Console.ReadLine());
+    return opcoes;
 }
 
-static string InserirAluno(Conexao db, Aluno aluno)
+void CadastrarAluno()
+{
+    Aluno aluno = new Aluno();
+
+    Console.WriteLine("Preencha os dados solicitados do Aluno");
+
+    Console.WriteLine("Nome Completo");
+    aluno.Nome = Console.ReadLine();
+
+    Console.WriteLine("Idade");
+    aluno.Idade = int.Parse(Console.ReadLine());
+
+    Console.WriteLine("Cpf");
+    aluno.Cpf = Console.ReadLine();
+
+    alunoRepositorio.InserirAluno(db, aluno);
+
+}
+
+void ConsultarAluno()
 {
     try
     {
-        string sql = $"INSERT INTO Aluno(Nome, Idade, Cpf) VALUES('{aluno.Nome}', {aluno.Idade}, '{aluno.Cpf}')";
-        SqlCommand comando = new SqlCommand(sql, db.conn);
+        var lista = alunoRepositorio.ObterTodosAlunos();
 
-        comando.ExecuteNonQuery();
+        Console.WriteLine("LISTA DE ALUNOS");
+        Console.WriteLine("=======================");
 
-        return "Aluno inserido com sucesso";
+        foreach (var aluno in lista)
+        {
+            Console.WriteLine($"Código: {aluno.Codigo} | Nome: {aluno.Nome} | Idade: {aluno.Idade} | CPF: {aluno.Cpf} ");
+        }
+
+        Console.WriteLine("\nPressione qualquer tecla para voltar ao menu...");
+        Console.ReadKey();
     }
-    catch(Exception e)  
-    {
-        return "Erro ao inserir aluno";
+    catch (Exception ex) {
+
+        Console.WriteLine("Erro ao consultar alunos:" + ex.Message);
     }
 }
